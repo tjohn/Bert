@@ -6,8 +6,8 @@ from scrapy import Selector
 
 from bert.items import ReviewItem
 
-class BertSpider(CrawlSpider):
-    name = 'bert'
+class LinksSpider(CrawlSpider):
+    name = 'links'
     allowed_domains = ['rogerebert.com']
     end_urls = list(string.ascii_uppercase)
     end_urls.append('other')
@@ -24,8 +24,8 @@ class BertSpider(CrawlSpider):
         items = []
         for site in sites:
             item = ReviewItem()
-            item['title'] = site.xpath('a/text()').extract().
-            item['link'] = site.xpath('a/@href').extract().
+            item['title'] = site.xpath('a/text()').extract()[0].strip()
+            item['link'] = site.xpath('a/@href').extract()[0].strip()
             items.append(item)
         return items
 
@@ -35,7 +35,7 @@ class BertSpider(CrawlSpider):
         items = []
         for site in sites:
             item = ReviewItem()
-            item['title'] = site.xpath('a/text()').extract()
-            item['link'] = site.xpath('a/@href').extract()
+            item['title'] = site.xpath('a/text()').extract()[0].strip()
+            item['link'] = site.xpath('a/@href').extract()[0].strip()
             items.append(item)
         return items
