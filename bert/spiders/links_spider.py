@@ -10,8 +10,8 @@ from scrapy.exceptions import DropItem
 
 from bert.items import ReviewItem
 
-class LinksSpider(CrawlSpider):
-    name = 'links'
+class ReviewSpider(CrawlSpider):
+    name = 'review_spider'
     allowed_domains = ['rogerebert.com']
     end_urls = list(string.ascii_uppercase)
     end_urls.append('other')
@@ -56,7 +56,7 @@ class LinksSpider(CrawlSpider):
             conn = sqlite3.connect('bert.sqlite3')
             cur = conn.cursor()
             cur.execute(''' SELECT * FROM movies WHERE link = ? LIMIT 1 ''', (url,) )
-            if cur.fetchone() is None: # will be True if link is not in database
+            if cur.fetchone() is None: # will be True only if link is not in database
                 request = Request(url, callback=self.parse_review)
                 item = ReviewItem()
                 request.meta['item'] = item
@@ -76,12 +76,12 @@ class LinksSpider(CrawlSpider):
             rating_location = '//*[@id="review"]/div[1]/div/section/article/header/p/span/meta[1]'
             rating = sel.xpath(rating_location).extract() # will fail if rating_location doesn't exist
             rating = rating[0]
-            test = 'success' # the review has a rating
+            has_rating = True # the review has a rating
         except:
-            test = 'failure' # the review doesn't have a rating
+            has_rating = False # the review doesn't have a rating
 
         # Applies test and only yields reviews with a rating
-        if test == 'success':
+        if has_rating is True:
             rating = re.findall('[01234]\.[05]', rating)
             title = sel.xpath('//*[@id="review"]/div[1]/div/aside[1]/section/h4/text()')
             item['rating'] = float(rating[0]) # extracts rating from list and converts to float
