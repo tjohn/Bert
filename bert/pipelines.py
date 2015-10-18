@@ -20,7 +20,7 @@ class SQLitePipeline(object):
         self.cur.execute(query)
 
     def process_item(self, item, spider):
-        if spider.name == 'links':  # only runs for the 'links' spider!
+        if spider.name == 'review_spider':  # only runs for the 'review_spider' spider!
             params = (item['title'], item['link'], item['rating'])
             self.cur.execute('''INSERT OR IGNORE INTO movies (title, link, rating)
                                 VALUES (?, ?, ?)''', params)
