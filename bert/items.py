@@ -12,4 +12,4 @@ class ReviewItem(Item):
     # name = scrapy.Field()
     title = Field()
     link = Field()
-    # rating = Field()
+    rating = Field()

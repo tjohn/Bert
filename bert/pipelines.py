@@ -11,16 +11,19 @@ import sqlite3
     def process_item(self, item, spider):
         return item'''
 
-class SQLitePipeLine(object):
+class SQLitePipeline(object):
     def __init__(self):
         self.conn = sqlite3.connect('bert.sqlite3')
         self.cur = self.conn.cursor()
-        query = ''' CREATE TABLE IF NOT EXISTS movies (id INTEGER PRIMARY KEY, title TEXT,
-                    stars REAL, link TEXT UNIQUE) '''
+        query = ''' CREATE TABLE IF NOT EXISTS movies (id INTEGER PRIMARY KEY, title TEXT NOT NULL,
+                    rating REAL NOT NULL, link TEXT NOT NULL UNIQUE, UNIQUE(title, rating) ) '''
         self.cur.execute(query)
 
     def process_item(self, item, spider):
-        params = (item['title'], item['link'])
-        self.cur.execute('''INSERT OR IGNORE INTO movies (title, link)
-                            VALUES (?, ?)''', params)
-        self.conn.commit()
+        if spider.name == 'links':  # only runs for the 'links' spider!
+            params = (item['title'], item['link'], item['rating'])
+            self.cur.execute('''INSERT OR IGNORE INTO movies (title, link, rating)
+                                VALUES (?, ?, ?)''', params)
+            self.conn.commit()
+        else:
+            return item

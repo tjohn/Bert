@@ -9,7 +9,7 @@
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = 'bert'
+BOT_NAME = 'bertbot'
 
 SPIDER_MODULES = ['bert.spiders']
 NEWSPIDER_MODULE = 'bert.spiders'
@@ -19,18 +19,18 @@ NEWSPIDER_MODULE = 'bert.spiders'
 #USER_AGENT = 'bert (+http://www.yourdomain.com)'
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-CONCURRENT_REQUESTS=1
+#CONCURRENT_REQUESTS = 16
 
 # Configure a delay for requests for the same website (default: 0)
 # See http://scrapy.readthedocs.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
 #DOWNLOAD_DELAY=3
 # The download delay setting will honor only one of:
-#CONCURRENT_REQUESTS_PER_DOMAIN=16
+CONCURRENT_REQUESTS_PER_DOMAIN = 16
 #CONCURRENT_REQUESTS_PER_IP=16
 
 # Disable cookies (enabled by default)
-#COOKIES_ENABLED=False
+COOKIES_ENABLED = False
 
 # Disable Telnet Console (enabled by default)
 #TELNETCONSOLE_ENABLED=False
@@ -62,19 +62,19 @@ CONCURRENT_REQUESTS=1
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'bert.pipelines.SQLitePipeLine': 300,
+    'bert.pipelines.SQLitePipeline': 100,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
 # NOTE: AutoThrottle will honour the standard settings for concurrency and delay
-#AUTOTHROTTLE_ENABLED=True
+'AUTOTHROTTLE_ENABLED = True'
 # The initial download delay
-#AUTOTHROTTLE_START_DELAY=5
+#AUTOTHROTTLE_START_DELAY = 1
 # The maximum download delay to be set in case of high latencies
-#AUTOTHROTTLE_MAX_DELAY=60
+'AUTOTHROTTLE_MAX_DELAY = 60'
 # Enable showing throttling stats for every response received:
-#AUTOTHROTTLE_DEBUG=False
+'AUTOTHROTTLE_DEBUG = True'
 
 # Enable and configure HTTP caching (disabled by default)
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html#httpcache-middleware-settings
