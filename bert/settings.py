@@ -62,7 +62,7 @@ COOKIES_ENABLED = False
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'bert.pipelines.SQLitePipeline': 100,
+    'bert.pipelines.ReviewItemPipeline': 100,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
