@@ -11,3 +11,4 @@ class ReviewItem(Item):
     title = Field()
     link = Field()
     rating = Field()
+    word_counts = Field()

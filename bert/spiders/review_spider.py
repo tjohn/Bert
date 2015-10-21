@@ -2,11 +2,12 @@ import re
 import sqlite3
 import string
 
+import nltk
+from nltk.stem.snowball import SnowballStemmer
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 from scrapy import Selector
 from scrapy.http import Request
-from scrapy.exceptions import DropItem
 
 from bert.items import ReviewItem
 
@@ -19,7 +20,7 @@ class ReviewSpider(CrawlSpider):
     start_urls = [url + i for i in end_urls]
 
     rules = (
-        Rule(LinkExtractor(allow=(), restrict_xpaths=('//li[@class="next_page"]',)), callback='parse_item', follow=True),
+        Rule(LinkExtractor(allow=(), restrict_xpaths=('//li[@class="next_page"]',)), callback='parse_successive_url', follow=True),
     )
 
     # Parses the start URLs for review links
@@ -33,13 +34,16 @@ class ReviewSpider(CrawlSpider):
             # Checks if the review is already in the database, only requests if not
             conn = sqlite3.connect('bert.sqlite3')
             cur = conn.cursor()
-            cur.execute('''SELECT * FROM movies WHERE link = ? LIMIT 1''', (url,) )
+            cur.execute(''' SELECT * FROM movies WHERE link = ? LIMIT 1 ''', (url,) )
             if cur.fetchone() is None: # will be True only if link is not in database
+                cur.close()
+
+                # Requests the parse_review function
                 request = Request(url, callback=self.parse_review)
                 item = ReviewItem()
                 request.meta['item'] = item
-                cur.close()
                 yield request
+
             else:
                 cur.close()
                 yield None
@@ -57,11 +61,14 @@ class ReviewSpider(CrawlSpider):
             cur = conn.cursor()
             cur.execute(''' SELECT * FROM movies WHERE link = ? LIMIT 1 ''', (url,) )
             if cur.fetchone() is None: # will be True only if link is not in database
+                cur.close()
+
+                # Requests the parse_review_ function
                 request = Request(url, callback=self.parse_review)
                 item = ReviewItem()
                 request.meta['item'] = item
-                cur.close()
                 yield request
+
             else:
                 cur.close()
                 yield None
@@ -81,12 +88,32 @@ class ReviewSpider(CrawlSpider):
             has_rating = False # the review doesn't have a rating
 
         # Applies test and only yields reviews with a rating
-        if has_rating is True:
+        if has_rating:
             rating = re.findall('[01234]\.[05]', rating)
             title = sel.xpath('//*[@id="review"]/div[1]/div/aside[1]/section/h4/text()')
             item['rating'] = float(rating[0]) # extracts rating from list and converts to float
             item['title'] = title.extract()[0].strip() # extracts and cleans the title
             item['link'] = response.url
+
+            # Parses review to obtain count of each stemmed word
+            text = sel.xpath('//div[@itemprop="reviewBody"]//p//text()').extract()
+            words = []
+            for block in text:
+                block = block.lower()
+                block_words = re.findall("[a-z']+", block)
+                words.extend(block_words)
+            with open('bert/spiders/stopwords.txt', 'r') as stopwords_file:
+                stopwords = [line.strip() for line in stopwords_file]
+            stopwords = set(stopwords)
+            filtered_words = [word for word in words if word not in stopwords] # removes stopwords
+            stemmer = SnowballStemmer('english')
+            stems = [stemmer.stem(word) for word in filtered_words] # stems words
+            counts = {}
+            for stem in stems:
+                counts[stem] = counts.get(stem, 0) + 1 # counts stems
+            item['word_counts'] = counts
+
             yield item
+
         else:
             yield None
